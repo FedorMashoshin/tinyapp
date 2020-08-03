@@ -11,11 +11,21 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+function generateRandomString() {
+    let result = '';
+    let str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      for(let i = 0; i < 6; i++){
+        result += str.charAt(Math.floor(Math.random() * str.length))
+  }
+  return result;
+  }
+
+/* Without this for POST, after submitting we wll have 404 */
 app.post("/urls", (req, res) => {
     console.log(req.body);  // Log the POST request body to the console
     res.send("Ok");         // Respond with 'Ok' (we will replace this)
   });
-  
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
