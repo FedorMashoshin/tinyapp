@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const bodyParser = require("body-parser");         // This is for POST METHOD 
+app.use(bodyParser.urlencoded({extended: true}));  // This is for POST METHOD 
 
 app.set("view engine", "ejs")
 
@@ -9,6 +11,11 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+app.post("/urls", (req, res) => {
+    console.log(req.body);  // Log the POST request body to the console
+    res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  });
+  
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
