@@ -23,12 +23,12 @@ return result;
 /* Without this for POST, after submitting we wll have 404 */
 app.post("/urls", (req, res) => {
     const newKey = generateRandomString();
-    urlDatabase[newKey] = req.body.longURL; //! Adding a pair of key - value to our object!!
+    urlDatabase[newKey] = req.body.longURL; //! Adding a pair of {key - value} to our object!!
     res.redirect(`/urls/${newKey}`);        //! Redirecting to our just generated shortURL page
 });
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.send("That is a homepage for TinyApp project!");
 });
 
 app.get("/urls.json", (req, res) => {
