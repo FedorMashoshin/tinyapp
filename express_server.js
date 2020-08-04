@@ -11,9 +11,10 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// FUNCTION for creating 6 random alphanumeric characters
 function generateRandomString() {
     let result = '';
-    let str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let str = '1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM';
       for(let i = 0; i < 6; i++){
         result += str.charAt(Math.floor(Math.random() * str.length))
   }
@@ -22,8 +23,9 @@ function generateRandomString() {
 
 /* Without this for POST, after submitting we wll have 404 */
 app.post("/urls", (req, res) => {
-    console.log(req.body);  // Log the POST request body to the console
-    res.send("Ok");         // Respond with 'Ok' (we will replace this)
+    const newKey = generateRandomString();
+    urlDatabase[newKey] = req.body.longURL; //! Adding a pair of key - value to our object!!
+    res.redirect(`/urls/${newKey}`);        //! Redirecting to our just generated shortURL page
   });
 
 app.get("/", (req, res) => {
