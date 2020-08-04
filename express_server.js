@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");         // This is for POST METHOD 
+const { response } = require("express");
 app.use(bodyParser.urlencoded({extended: true}));  // This is for POST METHOD 
 app.set("view engine", "ejs")
 
@@ -26,6 +27,7 @@ app.post("/urls", (req, res) => {
     urlDatabase[newKey] = req.body.longURL; //! Adding a pair of {key - value} to our object!!
     res.redirect(`/urls/${newKey}`);        //! Redirecting to our just generated shortURL page
 });
+
 
 app.get("/", (req, res) => {
   res.send("That is a homepage for TinyApp project!");
@@ -63,3 +65,10 @@ app.get("/hello", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+//DELETE 
+app.post("/urls/:shortURL/delete", (req, res) => {
+  delete urlDatabase[req.params.shortURL]; // Deleting the key from Obj --> deleting whole element
+  res.redirect("/urls");                   // Redirecting 
+  })
+  
