@@ -48,7 +48,7 @@ app.get("/urls", (req, res) => {
     let templateVars = {
       urls: urlDatabase,
       username: req.cookies["username"]}; //! We took it from --> res.cookie('username', req.body.username);
-res.render("urls_index", templateVars);
+res.render("urls_index", templateVars); // Now we can use our templateVars in urls_index 
 
 });
 
@@ -64,11 +64,11 @@ app.get("/urls/:shortURL", (req, res) => {
       longURL:urlDatabase[req.params.shortURL],
       username: req.cookies["username"]
      };
-res.render("urls_show", templateVars);
+res.render("urls_show", templateVars); 
 });
 
 // ===== After clicking on shortURL(PATH --> /u/:shortURL) redirecting to usuall WEB-SITE(longURL) ===== \\
-app.get("/u/:shortURL", (req, res) => {
+app.get("/u/:shortURL", (req, res) => { //:shortURL is dynamic (new all the time)
   let templateVars = { 
     shortURL: req.params.shortURL, 
     longURL:urlDatabase[req.params.shortURL] 
