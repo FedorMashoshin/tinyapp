@@ -14,12 +14,13 @@
         </div>
       </div>
       <div>
+        <!-- (username) from js POST LOGIN/LOGOUT -->
         <% if(username){ %>
           <form method="POST" action="/logout"> Logged in As: <%= username %> <button type="submit" class="btn btn-outline-dark" style="width: 150px">Logout</button> </form>
         <% } else{ %>  
       <form method="POST" action="/login">
-        <input class="form-control" type="text" name="username" placeholder="Username" style="width: 150px; margin-bottom: 10px;"> 
-        <button type="submit" class="btn btn-outline-dark" style="width: 150px">Login</button>  
+        <input type="text" name="username" placeholder="Username" style="height: 40px"> 
+        <button type="submit" class="btn btn-outline-dark" style="width: 100px">Login</button>  
         <% } %>          
       </form>
     </div>

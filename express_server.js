@@ -25,45 +25,37 @@ return result;
 }
 
 /* Without this for POST, after submitting we wll have 404 */
+// ADD a new data (key - value) to our TinyApp
 app.post("/urls", (req, res) => {
     const newKey = generateRandomString();
     urlDatabase[newKey] = req.body.longURL; //! Adding a pair of {key - value} to our object!!
     res.redirect(`/urls/${newKey}`);        //! Redirecting to our just generated shortURL page
 });
 
+// LOGIN Form 
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect(`urls/`);
-})
-
-app.post("/logout", (req, res) => {
-  res.clearCookie('username', req.body.username)
-  res.redirect(`urls/`);
-})
-
-
-
-
-app.get("/", (req, res) => {
-  res.send("That is a homepage for TinyApp project!");
+res.cookie('username', req.body.username); // (name: username, value: req.body.username (our username via login button))
+res.redirect(`urls/`);
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+// LOGOUT Form
+app.post("/logout", (req, res) => {
+res.clearCookie('username', req.body.username) // Clean our cookie! via logout button
+res.redirect(`urls/`);
 });
 
 app.get("/urls", (req, res) => {
     let templateVars = {
       urls: urlDatabase,
       username: req.cookies["username"]}; //! We took it from --> res.cookie('username', req.body.username);
-    res.render("urls_index", templateVars);
+res.render("urls_index", templateVars);
 
 });
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
     username: req.cookies["username"]};
-    res.render("urls_new", templateVars);
+res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -72,32 +64,31 @@ app.get("/urls/:shortURL", (req, res) => {
       longURL:urlDatabase[req.params.shortURL],
       username: req.cookies["username"]
      };
-    res.render("urls_show", templateVars);
+res.render("urls_show", templateVars);
 });
 
 // ===== After clicking on shortURL(PATH --> /u/:shortURL) redirecting to usuall WEB-SITE(longURL) ===== \\
 app.get("/u/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL:urlDatabase[req.params.shortURL] };
+  let templateVars = { 
+    shortURL: req.params.shortURL, 
+    longURL:urlDatabase[req.params.shortURL] 
+  };
   const longURL = templateVars.longURL
-    res.redirect(longURL);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
+res.redirect(longURL);
 });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-//DELETE 
+//DELETE our URLs
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL]; // Deleting the key from Obj --> deleting whole element
-  res.redirect("/urls");                   // Redirecting 
+res.redirect("/urls");                  
   })
-  
+
+// EDIT our URLs
 app.post("/urls/:shortURL", (req, res) => {
-const short = req.params.shortURL;
 /*
 !As we have 2 buttons with POST /urls/:shortURL thet will redirect to different PATH
 */
@@ -107,5 +98,15 @@ const short = req.params.shortURL;
     urlDatabase[req.params.shortURL] = newLong;
   res.redirect(`/urls`);
  } 
-res.redirect(`/urls/${short}`);
+res.redirect(`/urls/${req.params.shortURL}`);
 });
+
+
+// ============= USELES ============= \\
+// app.get("/", (req, res) => {
+//   res.send("That is a homepage for TinyApp project!");
+// });
+
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// });
