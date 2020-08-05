@@ -14,6 +14,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+};
+
 // FUNCTION for creating 6 random alphanumeric characters
 function generateRandomString() {
     let result = '';
@@ -32,22 +45,41 @@ app.post("/urls", (req, res) => {
     res.redirect(`/urls/${newKey}`);        //! Redirecting to our just generated shortURL page
 });
 
+//REGISTRATION FORM
+app.post("/register", (req, res) => {
+  const user = req.body; // user = (email: ... ; password: ... ) (We READ info FROM our INPUT)
+  if(!user.email || !user.password || user.email === users[user.email]){
+    res.statusCode = 400;
+    res.send("You should fill all fields!");
+  } else {
+    let newUser = {
+           id: generateRandomString(),
+           email: user.email,
+           password: user.password
+    };
+
+    users[newUser.id] = newUser; // Our just generated ID now is a NEW USER id --> adding a new user to users object
+    res.cookie('username', newUser.email);
+}
+    res.redirect(`urls/`);
+});
 // LOGIN Form 
 app.post("/login", (req, res) => {
-res.cookie('username', req.body.username); // (name: username, value: req.body.username (our username via login button))
+// res.cookie('username', req.body.username); // (name: username, value: req.body.username (our username via login button))
 res.redirect(`urls/`);
 });
 
 // LOGOUT Form
 app.post("/logout", (req, res) => {
-res.clearCookie('username', req.body.username) // Clean our cookie! via logout button
+res.clearCookie('username') // Clean our cookie! via logout button
 res.redirect(`urls/`);
 });
+
 
 app.get("/urls", (req, res) => {
     let templateVars = {
       urls: urlDatabase,
-      username: req.cookies["username"]}; //! We took it from --> res.cookie('username', req.body.username);
+      username: req.cookies["username"]}; //! We took it from --> res.cookie('username', newUser.email);
 res.render("urls_index", templateVars); // Now we can use our templateVars in urls_index 
 
 });
