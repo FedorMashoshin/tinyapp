@@ -52,6 +52,11 @@ res.render("urls_index", templateVars); // Now we can use our templateVars in ur
 
 });
 
+app.get("/register" ,(req,res) => {
+  let templateVars = { username: req.cookies["username"]};
+  res.render("register", templateVars);
+})
+
 app.get("/urls/new", (req, res) => {
   let templateVars = {
     username: req.cookies["username"]};
