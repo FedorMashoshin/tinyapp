@@ -72,3 +72,16 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");                   // Redirecting 
   })
   
+app.post("/urls/:shortURL", (req, res) => {
+const short = req.params.shortURL;
+/*
+!As we have 2 buttons with POST /urls/:shortURL thet will redirect to different PATH
+*/
+  if(req.body.longURL){ // this variable from urls/show --> on page /urls is FALSE
+  // Changing old longURL (req.body.longURL) to new (using body.longURL from name="longURL" show.ejs)
+  const newLong = req.body.longURL; 
+    urlDatabase[req.params.shortURL] = newLong;
+  res.redirect(`/urls`);
+ } 
+res.redirect(`/urls/${short}`);
+});
