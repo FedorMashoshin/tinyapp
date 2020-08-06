@@ -40,17 +40,33 @@ function generateRandomString() {
   }
   return result;
 }
+// FUNCTION for creating an object with our URLS
+function urlsForUser(id){
+  const newObj = {};
+  for(key in urlDatabase){
+  if(urlDatabase[key].userID === id){
+    newObj[key] = urlDatabase[key];
+  }
+}
+return newObj;
+}
+// FUNCTION for finding user via userID
+function logedInUser(userID){
+  const user = users[userID]
+  return user;
+}
 
 /* Without this for POST, after submitting we wll have 404 */
 // ADD a new data (key - value) to our TinyApp
 app.post("/urls", (req, res) => {
   const newKey = generateRandomString();
-  urlDatabase[newKey] = req.body.longURL; //! Adding a pair of {key - value} to our object!!
+  urlDatabase[newKey] = {longURL: req.body.longURL, userID:req.cookies.user_id }; //! Adding a pair of {key - value} to our object!!
   res.redirect(`/urls/${newKey}`); //! Redirecting to our just generated shortURL page
 });
 
 //REGISTRATION FORM
 app.post("/register", (req, res) => {
+  
   const user = req.body; // user = (email: ... ; password: ... ) (We READ info FROM our INPUT)
   /* 
   1 - Checking if our fileds are empty or not (If empty 400 statusCode and refresh our page)
@@ -74,7 +90,7 @@ app.post("/register", (req, res) => {
     password: user.password
   };
   users[newUser.id] = newUser; // Our just generated ID now is a NEW USER id --> adding a new user to users object
-  res.cookie('user_id', newUser.email);
+  res.cookie('user_id', newUser.id); ///////////////////////////
   res.redirect(`/urls`);
 });
 
@@ -87,7 +103,7 @@ app.post("/login", (req, res) => {
   for (let newUser in users) {
     let userDetails = users[newUser];
     if (userDetails.email === user.email && userDetails.password === user.password) {
-      res.cookie('user_id', user.email);
+      res.cookie('user_id', userDetails.id); 
       res.redirect(`/urls`);
     }
   }
@@ -105,9 +121,13 @@ app.post("/logout", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
+  if(req.cookies["user_id"] === undefined){ // Checking if our user registred in the system
+    res.redirect('/login')
+  }
+  
   let templateVars = {
-    urls: urlDatabase,
-    user_id: req.cookies["user_id"] //! We took it from --> res.cookie('username', newUser.email);
+    urls: urlsForUser(req.cookies["user_id"]),
+    user: logedInUser(req.cookies["user_id"])//! We took it from --> res.cookie('username', newUser.email);
   }; 
   res.render("urls_index", templateVars); // Now we can use our templateVars in urls_index 
 
@@ -115,14 +135,14 @@ app.get("/urls", (req, res) => {
 
 app.get("/register", (req, res) => {
   let templateVars = {
-    user_id: req.cookies["user_id"]
-  };
+    user: logedInUser(req.cookies["user_id"]) //! We took it from --> res.cookie('username', newUser.email);
+  }; 
   res.render("register", templateVars);
 });
 
 app.get("/login", (req, res) => {
   let templateVars = {
-    user_id: req.cookies["user_id"]
+    user:logedInUser(req.cookies["user_id"])
   };
   res.render("login", templateVars);
 });
@@ -132,25 +152,32 @@ app.get("/urls/new", (req, res) => {
     res.redirect('/login')
     }
     let templateVars = {
-      user_id: req.cookies["user_id"]
+      user:logedInUser(req.cookies["user_id"]) 
     };
     res.render("urls_new", templateVars);
   });
 
 app.get("/urls/:shortURL", (req, res) => {
+  if(req.cookies["user_id"] === undefined){ // Checking if our user registred in the system
+    res.redirect('/login')
+    }
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
-    user_id: req.cookies["user_id"]
+    user:logedInUser(req.cookies["user_id"])
   };
-  res.render("urls_show", templateVars);
+  if(req.cookies["user_id"] === urlDatabase[req.params.shortURL].userID){
+    res.render("urls_show", templateVars);
+  } else{
+    res.send("You don't have matching URLs here!");
+  }
 });
 
 // ===== After clicking on shortURL(PATH --> /u/:shortURL) redirecting to usuall WEB-SITE(longURL) ===== \\
 app.get("/u/:shortURL", (req, res) => { //:shortURL is dynamic (new all the time)
   let templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]
+    longURL: urlDatabase[req.params.shortURL].longURL
   };
   const longURL = templateVars.longURL
   res.redirect(longURL);
@@ -162,19 +189,23 @@ app.listen(PORT, () => {
 
 //DELETE our URLs
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL]; // Deleting the key from Obj --> deleting whole element
+  console.log(req.cookies["user_id"], urlDatabase[req.params.shortURL].userID)
+  if(req.cookies["user_id"] === urlDatabase[req.params.shortURL].userID){
+    delete urlDatabase[req.params.shortURL]; // Deleting the key from Obj --> deleting whole element
+  }
   res.redirect("/urls");
 })
 
 // EDIT our URLs
-app.post("/urls/:shortURL", (req, res) => {
+app.post("/urls/:shortURL", (req, res) => { 
+  
   /*
   !As we have 2 buttons with POST /urls/:shortURL thet will redirect to different PATH
   */
   if (req.body.longURL) { // this variable from urls/show --> on page /urls is FALSE
     // Changing old longURL (req.body.longURL) to new (using body.longURL from name="longURL" show.ejs)
     const newLong = req.body.longURL;
-    urlDatabase[req.params.shortURL] = newLong;
+    urlDatabase[req.params.shortURL].longURL = newLong;
     res.redirect(`/urls`);
   }
   res.redirect(`/urls/${req.params.shortURL}`);

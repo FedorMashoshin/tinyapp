@@ -15,8 +15,8 @@
       </div>
       <div>
         <!-- (user_id) from JS file -->
-        <% if(user_id){ %>
-          <form method="POST" action="/logout"> Logged in As: <%= user_id %> <button type="submit" class="btn btn-outline-dark" style="width: 150px">Logout</button> </form>
+        <% if(user){ %>
+          <form method="POST" action="/logout"> Logged in As: <%= user.email %> <button type="submit" class="btn btn-outline-dark" style="width: 150px">Logout</button> </form>
         <% } else{ %>   
       <form method="GET" action="/login">    <button type="submit" class="btn btn-outline-dark" style="width: 80px;">Login</button> </form>
       <form method="GET" action="/register"> <button type="submit" class="btn btn-outline-warning" style="width: 80px">Register</button></form>
