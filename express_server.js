@@ -14,8 +14,8 @@ app.set("view engine", "ejs")
 app.use(cookieParser());
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
 
 const users = {
@@ -75,7 +75,7 @@ app.post("/register", (req, res) => {
   };
   users[newUser.id] = newUser; // Our just generated ID now is a NEW USER id --> adding a new user to users object
   res.cookie('user_id', newUser.email);
-  res.redirect(`/urls`)
+  res.redirect(`/urls`);
 });
 
 // LOGIN Form 
@@ -128,16 +128,19 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = {
-    user_id: req.cookies["user_id"]
-  };
-  res.render("urls_new", templateVars);
-});
+  if(req.cookies["user_id"] === undefined){ // Checking if our user registred in the system
+    res.redirect('/login')
+    }
+    let templateVars = {
+      user_id: req.cookies["user_id"]
+    };
+    res.render("urls_new", templateVars);
+  });
 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL,
     user_id: req.cookies["user_id"]
   };
   res.render("urls_show", templateVars);
