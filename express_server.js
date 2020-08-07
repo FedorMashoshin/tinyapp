@@ -160,7 +160,6 @@ app.post("/logout", (req, res) => {
 ======================================== */
 app.get("/urls", (req, res) => {
   const id = req.session["user_id"];
-  console.log(id)
   // Checking if our user is not in our databse
   if (id === undefined) { 
     res.redirect('/login');
