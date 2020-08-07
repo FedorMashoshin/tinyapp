@@ -19,6 +19,6 @@
 
 ## Getting Started
 
-- [x] Install all dependencies (using the `npm install` command).
-- [x] Run the development web server using the `node express_server.js` command.
-- [x][x][x]Enjoy!
+[x] Install all dependencies (using the `npm install` command).
+[x] Run the development web server using the `node express_server.js` command.
+[x]Enjoy!
