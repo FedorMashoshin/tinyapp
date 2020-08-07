@@ -1,9 +1,10 @@
+/* eslint-disable camelcase */
 const { getUserByEmail } = require('./helpers');
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
-const bodyParser = require("body-parser"); // This is for POST METHOD 
-const cookieSession = require('cookie-session')
+const bodyParser = require("body-parser"); // This is for POST METHOD
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const { response } = require("express");
 
@@ -14,8 +15,8 @@ app.use(cookieSession({
 
 app.use(bodyParser.urlencoded({
   extended: true
-})); 
-app.set("view engine", "ejs")
+}));
+app.set("view engine", "ejs");
 
 // =============================== DEFAULT DATA ===================================== \\
 
@@ -43,53 +44,53 @@ const users = {
   }
 };
 
-/* ======================================== 
+/* ========================================
     FUNCTION FOR CREATING RANDON STRING
 ======================================== */
-function generateRandomString() {
+const generateRandomString = () => {
   let result = '';
   let str = '1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM';
   for (let i = 0; i < 6; i++) {
-    result += str.charAt(Math.floor(Math.random() * str.length))
+    result += str.charAt(Math.floor(Math.random() * str.length));
   }
-return result;
-}
+  return result;
+};
 
 /* ===============================================
     FUNCTION for creating an object with our URLS
 =============================================== */
-function urlsForUser(id) {
+const urlsForUser = id => {
   const newObj = {};
-  for (key in urlDatabase) {
+  for (let key in urlDatabase) {
     if (urlDatabase[key].userID === id) {
       newObj[key] = urlDatabase[key];
     }
   }
-return newObj;
-}
-/* ======================================== 
+  return newObj;
+};
+/* ========================================
     FUNCTION that returns user by userID
-======================================== */ 
-function logedInUser(userID) {
+======================================== */
+const logedInUser = userID =>  {
   const user = users[userID];
   return user;
-}
+};
 
-/* ======================================== 
+/* ========================================
              /URLS POST
-======================================== */ 
+======================================== */
 app.post("/urls", (req, res) => {
   const newKey = generateRandomString();
   // Adding a pair of {key: value} to our object
   urlDatabase[newKey] = {
     longURL: req.body.longURL,
     userID: req.session.user_id
-  }; 
+  };
   res.redirect(`/urls/${newKey}`);
 });
 
 
-/* ======================================== 
+/* ========================================
              /REGISTER POST
 ======================================== */
 app.post("/register", (req, res) => {
@@ -99,14 +100,14 @@ app.post("/register", (req, res) => {
   if (!email || !password) {
     res.statusCode = 400;
     res.send('Please, fill up all the fields!');
-  return
+    return;
   }
   // Checking if we have thats user in our database (by email)
   const user = getUserByEmail(email, users);
   if (user) {
     res.statusCode = 400;
     res.send('Sorry, user with that email already eists.');
-  return;
+    return;
   }
   // IF everuthing is fine --> create new user
   const id = generateRandomString();
@@ -121,8 +122,8 @@ app.post("/register", (req, res) => {
   res.redirect(`/urls`);
 });
 
-/* ======================================== 
-              /LOGIN POST 
+/* ========================================
+              /LOGIN POST
 ======================================== */
 app.post("/login", (req, res) => {
   // Checking if our email/password fields are empty
@@ -131,14 +132,14 @@ app.post("/login", (req, res) => {
   if (!email || !password) {
     res.statusCode = 400;
     res.send('Please, fill up all the fields!');
-  return;
+    return;
   }
   // Checking if we have user in our database
   const user = getUserByEmail(email, users);
   if (!user || !bcrypt.compareSync(password, user.password)) {
     res.statusCode = 302;
     res.send('Sorry! Your email or password is incorrect!');
-  return;
+    return;
   }
   // Encrypting our user.id (value)
   req.session.user_id = user.id;
@@ -146,8 +147,8 @@ app.post("/login", (req, res) => {
   res.redirect(`/urls`);
 });
 
-/* ======================================== 
-              /LOGOUT POST 
+/* ========================================
+              /LOGOUT POST
 ======================================== */
 // Killing our session
 app.post("/logout", (req, res) => {
@@ -155,25 +156,25 @@ app.post("/logout", (req, res) => {
   res.redirect(`login/`);
 });
 
-/* ======================================== 
-               /URLS GET 
+/* ========================================
+               /URLS GET
 ======================================== */
 app.get("/urls", (req, res) => {
   const id = req.session["user_id"];
   // Checking if our user is not in our databse
-  if (id === undefined) { 
+  if (id === undefined) {
     res.redirect('/login');
   }
   const user = users[id];
   const urls = urlsForUser(id);
   let templateVars = { urls, user };
   // Now we allowed to use templateVars in urls_index.ejs
-  res.render("urls_index", templateVars); 
+  res.render("urls_index", templateVars);
 });
 
 
-/* ======================================== 
-               /REGISTER GET 
+/* ========================================
+               /REGISTER GET
 ======================================== */
 app.get("/register", (req, res) => {
   let templateVars = { user: logedInUser(req.session["user_id"]) };
@@ -181,8 +182,8 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
-/* ======================================== 
-               /LOGIN GET 
+/* ========================================
+               /LOGIN GET
 ======================================== */
 app.get("/login", (req, res) => {
   let templateVars = { user: logedInUser(req.session["user_id"]) };
@@ -190,12 +191,12 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
-/* ======================================== 
-            /URLS/NEW GET 
+/* ========================================
+            /URLS/NEW GET
 ======================================== */
 app.get("/urls/new", (req, res) => {
   // Checking if our user is not in our databse
-  if (req.session["user_id"] === undefined) { 
+  if (req.session["user_id"] === undefined) {
     res.redirect('/login');
   }
   let templateVars = { user: logedInUser(req.session["user_id"]) };
@@ -203,8 +204,8 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-/* ======================================== 
-          /URLS/:SHORTURL GET 
+/* ========================================
+          /URLS/:SHORTURL GET
 ======================================== */
 app.get("/urls/:shortURL", (req, res) => {
   // Checking if our user is not in our databse
@@ -225,11 +226,11 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 });
 
-/* ======================================== 
-          /U/:SHORTURL GET 
+/* ========================================
+          /U/:SHORTURL GET
 ======================================== */
 //:shortURL is dynamic (new all the time)
-app.get("/u/:shortURL", (req, res) => { 
+app.get("/u/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL
@@ -238,19 +239,19 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-/* ======================================== 
+/* ========================================
             DELETING URLs POST
 ======================================== */
 app.post("/urls/:shortURL/delete", (req, res) => {
   // Checking if our ID is equal to ID from database (to delete elements)
   if (req.session["user_id"] === urlDatabase[req.params.shortURL].userID) {
     // Deleting the key from Obj --> deleting whole element
-    delete urlDatabase[req.params.shortURL]; 
+    delete urlDatabase[req.params.shortURL];
   }
   res.redirect("/urls");
-})
+});
 
-/* ======================================== 
+/* ========================================
             EDITING URLs POST
 ======================================== */
 app.post("/urls/:shortURL", (req, res) => {
@@ -262,10 +263,10 @@ app.post("/urls/:shortURL", (req, res) => {
     res.redirect(`/urls`);
   }
   res.redirect(`/urls/${req.params.shortURL}`);
- });
+});
 
 
-/* ======================================== 
+/* ========================================
             LISTEN PORT
 ======================================== */
 app.listen(PORT, () => {
