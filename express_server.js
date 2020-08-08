@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-const { getUserByEmail } = require('./helpers');
+const { getUserByEmail, generateRandomString, urlsForUser, logedInUser} = require('./helpers');
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -45,36 +45,12 @@ const users = {
 };
 
 /* ========================================
-    FUNCTION FOR CREATING RANDON STRING
+             / GET
 ======================================== */
-const generateRandomString = () => {
-  let result = '';
-  let str = '1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM';
-  for (let i = 0; i < 6; i++) {
-    result += str.charAt(Math.floor(Math.random() * str.length));
-  }
-  return result;
-};
-
-/* ===============================================
-    FUNCTION for creating an object with our URLS
-=============================================== */
-const urlsForUser = id => {
-  const newObj = {};
-  for (let key in urlDatabase) {
-    if (urlDatabase[key].userID === id) {
-      newObj[key] = urlDatabase[key];
-    }
-  }
-  return newObj;
-};
-/* ========================================
-    FUNCTION that returns user by userID
-======================================== */
-const logedInUser = userID =>  {
-  const user = users[userID];
-  return user;
-};
+// Redirecting to our home page
+app.get("/", (req, res) => {
+  res.redirect(`/urls`);
+});
 
 /* ========================================
              /URLS POST
@@ -166,7 +142,7 @@ app.get("/urls", (req, res) => {
     res.redirect('/login');
   }
   const user = users[id];
-  const urls = urlsForUser(id);
+  const urls = urlsForUser(id, urlDatabase);
   let templateVars = { urls, user };
   // Now we allowed to use templateVars in urls_index.ejs
   res.render("urls_index", templateVars);
@@ -177,7 +153,8 @@ app.get("/urls", (req, res) => {
                /REGISTER GET
 ======================================== */
 app.get("/register", (req, res) => {
-  let templateVars = { user: logedInUser(req.session["user_id"]) };
+  const user = req.session["user_id"];
+  let templateVars = { user: logedInUser(user, users) };
   // Now we allowed to use templateVars in register.ejs
   res.render("register", templateVars);
 });
@@ -186,7 +163,8 @@ app.get("/register", (req, res) => {
                /LOGIN GET
 ======================================== */
 app.get("/login", (req, res) => {
-  let templateVars = { user: logedInUser(req.session["user_id"]) };
+  const user = req.session["user_id"];
+  let templateVars = { user: logedInUser(user, users) };
   // Now we allowed to use templateVars in login.ejs
   res.render("login", templateVars);
 });
@@ -196,10 +174,11 @@ app.get("/login", (req, res) => {
 ======================================== */
 app.get("/urls/new", (req, res) => {
   // Checking if our user is not in our databse
-  if (req.session["user_id"] === undefined) {
+  const user = req.session["user_id"];
+  if (user === undefined) {
     res.redirect('/login');
   }
-  let templateVars = { user: logedInUser(req.session["user_id"]) };
+  let templateVars = { user: logedInUser(user, users) };
   // Now we allowed to use templateVars in urls_new.ejs
   res.render("urls_new", templateVars);
 });
@@ -209,16 +188,17 @@ app.get("/urls/new", (req, res) => {
 ======================================== */
 app.get("/urls/:shortURL", (req, res) => {
   // Checking if our user is not in our databse
-  if (req.session["user_id"] === undefined) {
+  const user = req.session["user_id"];
+  if (user === undefined) {
     res.redirect('/login');
   }
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
-    user: logedInUser(req.session["user_id"])
+    user: logedInUser(user, users)
   };
   // Checking if our IDs are equal to show URLs list
-  if (req.session["user_id"] === urlDatabase[req.params.shortURL].userID) {
+  if (user === urlDatabase[req.params.shortURL].userID) {
     // Now we allowed to use templateVars in urls_show.ejs
     res.render("urls_show", templateVars);
   } else {
@@ -243,8 +223,9 @@ app.get("/u/:shortURL", (req, res) => {
             DELETING URLs POST
 ======================================== */
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const user = req.session["user_id"];
   // Checking if our ID is equal to ID from database (to delete elements)
-  if (req.session["user_id"] === urlDatabase[req.params.shortURL].userID) {
+  if (user === urlDatabase[req.params.shortURL].userID) {
     // Deleting the key from Obj --> deleting whole element
     delete urlDatabase[req.params.shortURL];
   }
